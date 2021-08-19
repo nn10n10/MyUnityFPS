@@ -505,3 +505,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3fd7e774091459048a027db4c9f8de19, type: 3}
+--- !u!1 &7911957360162445038 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 290740217649660122, guid: 3fd7e774091459048a027db4c9f8de19, type: 3}
+  m_PrefabInstance: {fileID: 7911957360162445037}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7911957360162445039
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7911957360162445038}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 08d2732fb379e46469ecdb78a86cfff2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MuzzlePoint: {fileID: 0}
+  CasingPoint: {fileID: 0}
+  MuzzleParticle: {fileID: 0}
+  CasingParticle: {fileID: 0}
+  FireRate: 11.7
+  AmmoInMag: 30
+  MaxAmmoCarried: 120

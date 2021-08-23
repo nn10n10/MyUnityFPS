@@ -27,10 +27,10 @@ public class FPCharacterControllerMovement : MonoBehaviour
 
     private void Start() {
         characterController = GetComponent<CharacterController>();
-        characterTransform = transform;
         originHeight = characterController.height;
-        charactorAnimator = GetComponentInChildren<Animator>();
+        characterTransform = transform;
     }
+    
 
     private void Update() {
         float tmp_CurrentSpeed = WalkSpeed;
@@ -39,7 +39,7 @@ public class FPCharacterControllerMovement : MonoBehaviour
 
             var tmp_Horizontal = Input.GetAxis("Horizontal");
             var tmp_Vertical = Input.GetAxis("Vertical");
-            movementDirection =  characterTransform.TransformDirection(new Vector3(tmp_Horizontal,0,tmp_Vertical));
+            movementDirection =  characterTransform.TransformDirection(new Vector3(tmp_Horizontal,0,tmp_Vertical)).normalized;
 
             if(Input.GetButtonDown("Jump"))
             {
@@ -62,7 +62,10 @@ public class FPCharacterControllerMovement : MonoBehaviour
             var tmp_velocity= characterController.velocity;
             tmp_velocity.y=0;
             velocity = tmp_velocity.magnitude;
-            charactorAnimator.SetFloat("Velocity",velocity,0.25f,Time.deltaTime);
+            if (charactorAnimator!=null)
+            {
+                charactorAnimator.SetFloat("Velocity",velocity,0.25f,Time.deltaTime);
+            }
         }
         movementDirection.y -= Gravity*Time.deltaTime;
         characterController.Move(movementDirection*tmp_CurrentSpeed*Time.deltaTime);
@@ -75,5 +78,10 @@ public class FPCharacterControllerMovement : MonoBehaviour
             yield return null;
             characterController.height = Mathf.SmoothDamp(characterController.height,_target,ref tmp_CurrentHeight,Time.deltaTime*5);
         }
+    }
+
+    internal void SetupAnimator(Animator _animator)
+    {
+         charactorAnimator = _animator;
     }
 }

@@ -1,5 +1,8 @@
+using System;
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using UnityEngine.Serialization;
 
 namespace Scripts.Weapon
 {
@@ -7,8 +10,11 @@ namespace Scripts.Weapon
     {
         public Transform MuzzlePoint;
         public Transform CasingPoint;
+        protected Transform GunCameraTransform;
+        protected Vector3 originalEyePosition;
 
         public Camera EyeCamera;
+        public Camera GunCamera;
         public ParticleSystem MuzzleParticle;
         public ParticleSystem CasingParticle;
 
@@ -16,12 +22,18 @@ namespace Scripts.Weapon
         public AudioSource FirearmsReloadAudioSource;
         public ImpactAudioData ImpactAudioData;
         public FirearmsAudioData FirearmsAudioData;
+        
+        public ScopeInfo BaseIronSight;
+        
         public float FireRate;
         public int AmmoInMag = 30;
         public int MaxAmmoCarried = 120;
         public float SpreadAngle;
+
         public GameObject BulletPrefab;
         private IEnumerator doAimCoroutine;
+        public List<ScopeInfo> ScopeInfos;
+        public ScopeInfo rigouScopeInfo;
 
         internal Animator GunAnimator;
         
@@ -29,8 +41,8 @@ namespace Scripts.Weapon
         protected float OriginFOV;
         protected bool isAiming;
         protected bool IsHoldingTrigger;
-        protected int CurrentAmmo;
-        protected int CurrentMaxAmmoCarried;
+        internal int CurrentAmmo;
+        internal int CurrentMaxAmmoCarried;
         protected AnimatorStateInfo GunStateInfo;
 
 
@@ -41,6 +53,9 @@ namespace Scripts.Weapon
             GunAnimator = GetComponent<Animator>();
             OriginFOV = EyeCamera.fieldOfView;
             doAimCoroutine = DoAim();
+            GunCameraTransform = GunCamera.transform;
+            originalEyePosition = GunCameraTransform.localPosition;
+            rigouScopeInfo = BaseIronSight;
         }
         public void DoAttack()
         {
@@ -98,8 +113,12 @@ namespace Scripts.Weapon
             while (true)
             {
                 yield return null;
-                float tmp_CurrentFOV = 0;
-                EyeCamera.fieldOfView = Mathf.SmoothDamp(EyeCamera.fieldOfView,isAiming?26:OriginFOV, ref tmp_CurrentFOV, Time.deltaTime * 2);
+                float tmp_EyeCurrentFOV = 0;
+                EyeCamera.fieldOfView = Mathf.SmoothDamp(EyeCamera.fieldOfView,isAiming?rigouScopeInfo.EyeFov:OriginFOV, ref tmp_EyeCurrentFOV, Time.deltaTime * 2);
+                float tmp_GunCurrentFOV = 0;
+                GunCamera.fieldOfView = Mathf.SmoothDamp(GunCamera.fieldOfView,isAiming?rigouScopeInfo.GunFov:OriginFOV, ref tmp_GunCurrentFOV, Time.deltaTime * 2);
+                Vector3 tmp_RefPosition = Vector3.zero;
+                GunCameraTransform.localPosition = Vector3.SmoothDamp(GunCameraTransform.localPosition,isAiming ? rigouScopeInfo.GunCameraPosition : originalEyePosition, ref tmp_RefPosition, Time.deltaTime*2);
             }
         }
 
@@ -121,6 +140,11 @@ namespace Scripts.Weapon
             }
         }
 
+        internal void SetupCarriedScope(ScopeInfo _scopeInfo)
+        {
+            rigouScopeInfo = _scopeInfo;
+        }
+
         internal void HoldTrigger()
         {
             DoAttack();
@@ -135,6 +159,16 @@ namespace Scripts.Weapon
         internal void ReloadAmmo()
         {
             Reload();
+        }
+    
+        [System.Serializable]
+        public class ScopeInfo
+        {
+            public string ScopeName;
+            public GameObject ScopeGameObject;
+            public float EyeFov;
+            public float GunFov;
+            public Vector3 GunCameraPosition;
         }
         
     } 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Items;
 using Scripts.Weapon;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class WeaponManager : MonoBehaviour
 {
@@ -17,6 +18,8 @@ public class WeaponManager : MonoBehaviour
 
     public LayerMask CheckItemLayerMask;
     private IEnumerator WaitingForHolsterEndCoroutine;
+    public Animator MainWEaponAnimator;
+    public Animator SecondWeaponAnimator;
     
 
     [SerializeField]private FPCharacterControllerMovement FpCharacterControllerMovement;
@@ -126,7 +129,11 @@ public class WeaponManager : MonoBehaviour
             carriedWeapon.gameObject.SetActive(false);
         carriedWeapon = _targetWeaon;
         carriedWeapon.gameObject.SetActive(true);
+        FpCharacterControllerMovement.SetupAnimator(carriedWeapon.GunAnimator);
+        _targetWeaon.CurrentAmmo = _targetWeaon.AmmoInMag;
+        _targetWeaon.CurrentMaxAmmoCarried = _targetWeaon.MaxAmmoCarried;
     }
+
 
     private void CheckItem()
     {
@@ -136,38 +143,70 @@ public class WeaponManager : MonoBehaviour
             RaycastMaxDistance,CheckItemLayerMask);
         if (tmp_IsItem)
         {
+            Debug.Log(tmp_RaycastHit.collider.name);
             if (Input.GetKeyDown(KeyCode.E))
             {
                 bool tmp_HasItem = tmp_RaycastHit.collider.TryGetComponent<BaseItem>(out BaseItem tmp_BaseItem);
                 if (tmp_BaseItem)
                 {
-                    if (tmp_BaseItem is FirearmsItem tmp_FirearmsItem)
-                    {
-                        foreach (Firearms tmp_Arm in Arms)
-                        {
-                            if (tmp_FirearmsItem.ArmsName.CompareTo(tmp_Arm.name) == 0)
-                            {
-                                switch (tmp_FirearmsItem.CurrentFirearmsType)
-                                {
-                                    case FirearmsItem.FirearmsType.AssultRefile:
-                                        MainWeapon = tmp_Arm;
-                                        break;
-                                    case FirearmsItem.FirearmsType.HandGun:
-                                        SecondearyWeapon = tmp_Arm;
-                                        break;
-                                    default:
-                                        throw new ArgumentOutOfRangeException();
-                                }
-
-
-                                SetupCarriedWeapon(tmp_Arm);
-                            }
-                        }
-                    }
+                    PickupWeapon(tmp_BaseItem);
+                    PickupAttachment(tmp_BaseItem);
                 }
             }
-            Debug.Log(tmp_RaycastHit.collider.name);
         }
+    }
+
+    private void PickupWeapon(BaseItem _baseItem)
+    {
+        if (_baseItem is FirearmsItem tmp_FirearmsItem)
+        {
+            foreach (Firearms tmp_Arm in Arms)
+            {
+                if (tmp_FirearmsItem.ArmsName.CompareTo(tmp_Arm.name) == 0)
+                {
+                    switch (tmp_FirearmsItem.CurrentFirearmsType)
+                    {
+                        case FirearmsItem.FirearmsType.AssultRefile:
+                            MainWeapon = tmp_Arm;
+                            break;
+                        case FirearmsItem.FirearmsType.HandGun:
+                            SecondearyWeapon = tmp_Arm;
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+
+
+                    SetupCarriedWeapon(tmp_Arm);
+                }
+            }
+        }
+    }
+
+    private void PickupAttachment(BaseItem _baseItem)
+    {
+        if (!(_baseItem is AttachmentItem tmp_attachment)) return;
+        switch (tmp_attachment.CurrentAttachmentType)
+        {
+            case AttachmentItem.attachmentType.Scope:
+                foreach (Firearms.ScopeInfo tmp_ScopeInfo in carriedWeapon.ScopeInfos)
+                {
+                    if (tmp_ScopeInfo.ScopeName.CompareTo(tmp_attachment.ItemName) != 0)
+                    {
+                        tmp_ScopeInfo.ScopeGameObject.SetActive(false);
+                        continue;
+                    }
+                    tmp_ScopeInfo.ScopeGameObject.SetActive(true);
+                    carriedWeapon.BaseIronSight.ScopeGameObject.SetActive(false);
+                    carriedWeapon.SetupCarriedScope(tmp_ScopeInfo);
+                }
+                break;
+            case AttachmentItem.attachmentType.Other:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+        
     }
 
 }

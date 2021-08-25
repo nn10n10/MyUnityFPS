@@ -7,10 +7,12 @@ namespace Items
         public enum ItemType
         {
             Firearms,
+            Attachment,
             Oters
         }
 
         public ItemType CurrentItemType;
         public int ItemId;
+        public string ItemName;
     }
 }

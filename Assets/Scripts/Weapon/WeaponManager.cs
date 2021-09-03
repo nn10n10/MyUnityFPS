@@ -12,10 +12,12 @@ public class WeaponManager : MonoBehaviour
     public Firearms SecondearyWeapon;
     public Transform WorldCameraTransform;
     private Firearms carriedWeapon;
+    public Text AmmoCountTextLabel;
 
     public List<Firearms> Arms = new List<Firearms>();
     public float RaycastMaxDistance=2;
 
+    public GameObject corsshari;
     public LayerMask CheckItemLayerMask;
     private IEnumerator WaitingForHolsterEndCoroutine;
     public Animator MainWEaponAnimator;
@@ -23,6 +25,12 @@ public class WeaponManager : MonoBehaviour
     
 
     [SerializeField]private FPCharacterControllerMovement FpCharacterControllerMovement;
+
+    private void UpdateAmmoInfo(int _ammo,int _remainingAmmo)
+    {
+        AmmoCountTextLabel.text = _ammo+"/"+ _remainingAmmo;
+    }
+
     private void Start()
     {
         if (MainWeapon)
@@ -55,12 +63,16 @@ public class WeaponManager : MonoBehaviour
         if (Input.GetMouseButtonDown(1))
         {
             carriedWeapon.Aiming(true);
+            corsshari.gameObject.SetActive(false);
         }
 
         if (Input.GetMouseButtonUp(1))
         {
             carriedWeapon.Aiming(false);
+            corsshari.SetActive(true);
         }
+
+        UpdateAmmoInfo(carriedWeapon.CurrentAmmo,carriedWeapon.CurrentMaxAmmoCarried);
     }
 
     private void SwapWeapon()
